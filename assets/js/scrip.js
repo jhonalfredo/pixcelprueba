@@ -1,12 +1,18 @@
 import {recuperarDatos,contarTemas,recuperarIntroduccion,recuperarTituloNivel} from "../js/recover-data.js";
 export {PonerContenido,agregarIntroduccionContenido,ponerTitulo,ponerTituloNivel}
-contarTemas();
-const nivelActual = 1;
 
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+    results = regex.exec(location.search);
+    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
 
-let temaActual =1;
+const nivelActual = getParameterByName('id');
+
+let temaActual = 1;
 let cantTemas = 0;
-
+contarTemas(nivelActual);
 recuperarTituloNivel("Niveles/nivel",nivelActual);
 pintarTituloTema(temaActual);
 ponerFuncionesBotones();
@@ -26,8 +32,8 @@ function pintarTituloTema(numeroTema){  /*cada que se haga click sobre un boton 
     /*PONER AQUI EL METODO PARA CAMBIAR EL CONTENDIO DEL TEMA*/
     let aux = "Contenidos/Cont-1";
     limpiarContenido();
-    recuperarIntroduccion("Temas/nivel1/tema",temaActual);
-    recuperarDatos("Temas","nivel1/tema",numeroTema);
+    recuperarIntroduccion(`Temas/nivel${nivelActual}/tema`,temaActual);
+    recuperarDatos("Temas",`nivel${nivelActual}/tema`,numeroTema);
 
 }
 
@@ -132,3 +138,4 @@ function cotrolarVisibilidadBotones(){
         botonSiguiente.classList.remove('oculto');
     }
 }
+
