@@ -1,4 +1,4 @@
-import {recuperarDatos,contarTemas,recuperarIntroduccion,recuperarTituloNivel} from "../js/recover-data.js";
+import {comprobarNivel,recuperarDatos,contarTemas,recuperarIntroduccion,recuperarTituloNivel} from "../js/recover-data.js";
 export {PonerContenido,agregarIntroduccionContenido,ponerTitulo,ponerTituloNivel}
 
 function getParameterByName(name) {
@@ -12,15 +12,31 @@ const nivelActual = getParameterByName('id');
 
 let temaActual = 1;
 let cantTemas = 0;
-contarTemas(nivelActual);
-recuperarTituloNivel("Niveles/nivel",nivelActual);
-pintarTituloTema(temaActual);
-ponerFuncionesBotones();
-cotrolarVisibilidadBotones();
+incializar();
+
+async function  incializar(){
+    var  aux = await comprobarNivel(nivelActual);
+    console.log('comprobar nivle--------------------------------------');
+    console.log(typeof aux.val().activo);
+    if(aux.val().activo){
+        var a = await contarTemas(nivelActual);
+        recuperarTituloNivel("Niveles/nivel",nivelActual);
+        pintarTituloTema(temaActual);
+        ponerFuncionesBotones();
+        cotrolarVisibilidadBotones();
+    }else{
+        console.log('poniendo nivle bloqueado')
+        agregarIntroduccionContenido('NIVEL_BLOQUEADO!!!');
+        var ba = document.querySelector('.boton-anterior');
+        ba.classList.add('oculto');
+        var bs = document.querySelector('.boton-siguiente');
+        bs.classList.add('oculto');
+    }
+}
 
 
 function pintarTituloTema(numeroTema){  /*cada que se haga click sobre un boton (anterior,siguiente) o sobre el muno lateral,este metodo se ejecutara*/
-    var botonesTemas  = document.querySelectorAll('.tema-del-nivel');
+    var botonesTemas  =  document.querySelectorAll('.tema-del-nivel');
     botonesTemas.forEach(b =>{
         if(numeroTema == b.value){
             b.classList.add('tema-seleccionado');
@@ -79,9 +95,14 @@ function ponerTitulo(item,aux){ /* lista de  nombres de temas  ordenados {tema1,
     const botonesTemas = document.querySelectorAll('.tema-del-nivel');
     botonesTemas.forEach(boton =>{
         boton.addEventListener('click',(e) =>{
-            temaActual=e.target.value;
-            pintarTituloTema(e.target.value);
-            $('.titulo-del-contenido').animate({scrollTop:0}, 'slow');
+            if(!(e.target.value == temaActual)){
+
+                temaActual=e.target.value;
+                pintarTituloTema(e.target.value);
+                $('.titulo-del-contenido').animate({scrollTop:0}, 'slow');
+
+            }
+        
         });
     });
     cantTemas++;
@@ -138,4 +159,6 @@ function cotrolarVisibilidadBotones(){
         botonSiguiente.classList.remove('oculto');
     }
 }
+
+
 

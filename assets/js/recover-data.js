@@ -1,6 +1,29 @@
 import {db,ref,get,child,onChildAdded} from "../js/connection-firebase.js";
 import {PonerContenido,agregarIntroduccionContenido,ponerTitulo,ponerTituloNivel} from "../js/scrip.js";
-export {recuperarDatos,recuperarIntroduccion,contarTemas,recuperarTituloNivel}
+export {comprobarNivel,recuperarDatos,recuperarIntroduccion,contarTemas,recuperarTituloNivel}
+
+
+
+function getDireccion(direccion){
+    var dbref = ref(db);
+    let exito = 0;
+    while (exito == 0) {
+        try {
+            var res = get(child(dbref,direccion));
+            exito = 1;
+        } catch (error) {
+            exito = 0;
+        }
+    }
+    return res;
+}
+
+
+async function comprobarNivel(codNivel){
+    var  aux = await getDireccion("Niveles/nivel"+codNivel);
+    return aux;
+}
+
 function recuperarDatos(ruta,elemento,numeroTema){
     const dbref = ref(db);
     get(child(dbref,ruta+"/"+elemento+numeroTema)).then((snapshot)=>{
@@ -37,17 +60,20 @@ function recuperarIntroduccion(ruta,numeroTema){
 }
 
 
-function contarTemas(nivelActual){
-        let objeto =new Object();
+async function contarTemas(nivelActual){
         let n = 1;
-        const commentsRef = ref(db, 'Temas/nivel'+nivelActual);
-        onChildAdded(commentsRef, (data) => { 
-            if (data.exists()) { //objeto recuperado (se ejecuta n veces hasta que termine de leer todos los niveles) 
-                objeto = data.val().datos; 
-                ponerTitulo(objeto["titulo"],n);
-                n++;
-            } else { alert("No se encontro el elemento"); } 
-        });   
+
+        var  data = await getDireccion("Temas/nivel"+nivelActual);
+        console.log('------------------')
+        console.log(data.val())
+        let res = [];
+        data.forEach(element => {
+
+            ponerTitulo(element.val().datos.titulo,n);
+            n++;
+            res.push(element.val().datos.titulo)
+        });
+    return   res
 }
 
 function recuperarTituloNivel(ruta,numeroNivel){
@@ -64,4 +90,5 @@ function recuperarTituloNivel(ruta,numeroNivel){
             console.log("unsucessfull, error" + error);
     });
 }
+
 
